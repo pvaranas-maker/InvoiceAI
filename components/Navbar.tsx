@@ -5,7 +5,7 @@ export default function Navbar() {
         InvoiceAI
       </h1>
 
-      <div className="hidden gap-8 md:flex">
+      <div className="hidden md:flex items-center space-x-8">
         <a href="#" className="hover:text-blue-400">
           Features
         </a>
