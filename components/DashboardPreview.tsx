@@ -10,6 +10,7 @@ export default function DashboardPreview() {
         <div className="rounded-xl bg-slate-800 p-4">
           <p className="text-sm text-slate-400">Invoices</p>
           <h2 className="text-2xl font-bold">124</h2>
+        
         </div>
 
         <div className="rounded-xl bg-slate-800 p-4">
@@ -30,6 +31,23 @@ export default function DashboardPreview() {
           Generate Invoice
         </button>
       </div>
+      <div className="mt-8 rounded-xl bg-slate-800 p-6">
+  <h3 className="text-xl font-bold">Quick Actions</h3>
+
+  <div className="mt-4 flex gap-4">
+    <button className="rounded-lg bg-blue-600 px-4 py-3 hover:bg-blue-500">
+      New Invoice
+    </button>
+
+    <button className="rounded-lg bg-slate-700 px-4 py-3 hover:bg-slate-600">
+      New Customer
+    </button>
+
+    <button className="rounded-lg bg-slate-700 px-4 py-3 hover:bg-slate-600">
+      New Estimate
+    </button>
+  </div>
+</div>
     </div>
   );
 }
