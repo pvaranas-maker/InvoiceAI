@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Sidebar from "../../components/Sidebar";
 
 export default function CustomersPage() {
   const [showModal, setShowModal] = useState(false);
@@ -57,17 +58,9 @@ export default function CustomersPage() {
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="flex">
-        <aside className="w-64 border-r border-slate-800 bg-slate-900 p-6">
-          <h1 className="text-3xl font-bold">InvoiceAI</h1>
-
-          <nav className="mt-10 space-y-4 text-slate-300">
-            <a href="/dashboard" className="block hover:text-white">Dashboard</a>
-            <a href="/customers" className="block font-semibold text-white">Customers</a>
-            <a href="/invoices" className="block hover:text-white">Invoices</a>
-            <a href="/estimates" className="block hover:text-white">Estimates</a>
-            <a href="/settings" className="block hover:text-white">Settings</a>
-          </nav>
-        </aside>
+        
+        <Sidebar />
+        
 
         <section className="flex-1 p-10">
           <div className="flex items-center justify-between">
