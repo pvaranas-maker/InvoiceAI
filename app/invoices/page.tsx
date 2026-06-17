@@ -26,7 +26,9 @@ export default function InvoicesPage() {
     { description: "", quantity: 1, price: 0 },
   ]);
   const [invoices, setInvoices] = useState<SavedInvoice[]>([]);
-  useEffect(() => {
+  const [selectedInvoice, setSelectedInvoice] = useState<SavedInvoice | null>(null);
+ 
+useEffect(() => {
     const savedInvoices = localStorage.getItem("invoices");
 
     if (savedInvoices) {
@@ -70,18 +72,30 @@ useEffect(() => {
   }
 
   function saveInvoice() {
-    const newInvoice: SavedInvoice = {
-      id: Date.now(),
-      invoiceNumber: nextInvoiceNumber,
+    const invoiceToSave: SavedInvoice = {
+      id: selectedInvoice ? selectedInvoice.id : Date.now(),
+      invoiceNumber: selectedInvoice ? selectedInvoice.invoiceNumber : nextInvoiceNumber,
       customer: customerName || "Unnamed Customer",
       items,
       subtotal,
       tax,
       total,
-      createdAt: new Date().toLocaleDateString(),
+      createdAt: selectedInvoice
+        ? selectedInvoice.createdAt
+        : new Date().toLocaleDateString(),
     };
 
-    setInvoices([newInvoice, ...invoices]);
+    if (selectedInvoice) {
+      setInvoices(
+        invoices.map((invoice) =>
+          invoice.id === selectedInvoice.id ? invoiceToSave : invoice
+        )
+      );
+    } else {
+      setInvoices([invoiceToSave, ...invoices]);
+    }
+
+    setSelectedInvoice(null);
     setCustomerName("");
     setItems([{ description: "", quantity: 1, price: 0 }]);
   }
@@ -160,7 +174,7 @@ useEffect(() => {
                   onClick={saveInvoice}
                   className="rounded-lg bg-blue-600 px-6 py-3 font-semibold hover:bg-blue-500"
                 >
-                  Save Invoice
+                  {selectedInvoice ? "Update Invoice" : "Save Invoice"}
                 </button>
               </div>
             </div>
@@ -211,10 +225,15 @@ useEffect(() => {
             ) : (
               <div className="mt-4 space-y-3">
                 {invoices.map((invoice) => (
-                  <div
+                 <div
                     key={invoice.id}
-                    className="flex items-center justify-between rounded-lg bg-slate-800 p-4"
-                  >
+                    onClick={() => {
+                        setSelectedInvoice(invoice);
+                        setCustomerName(invoice.customer);
+                        setItems(invoice.items);
+                  }}
+                className="flex cursor-pointer items-center justify-between rounded-lg bg-slate-800 p-4 hover:bg-slate-700"
+>
                     <div>
                       <p className="font-semibold">{invoice.customer}</p>
                       <p className="text-sm text-slate-400">
