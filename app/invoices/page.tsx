@@ -70,7 +70,25 @@ useEffect(() => {
 
     setItems(updatedItems);
   }
+function deleteInvoice(id: number) {
+  const updatedInvoices = invoices.filter(
+    (invoice) => invoice.id !== id
+  );
 
+  setInvoices(updatedInvoices);
+
+  if (selectedInvoice?.id === id) {
+    setSelectedInvoice(null);
+    setCustomerName("");
+    setItems([
+      {
+        description: "",
+        quantity: 1,
+        price: 0,
+      },
+    ]);
+  }
+}
   function saveInvoice() {
     const invoiceToSave: SavedInvoice = {
       id: selectedInvoice ? selectedInvoice.id : Date.now(),
@@ -241,9 +259,21 @@ useEffect(() => {
                       </p>
                     </div>
 
-                    <p className="text-xl font-bold">
-                      ${invoice.total.toFixed(2)}
-                    </p>
+                    <div className="flex items-center gap-4">
+  <p className="text-xl font-bold">
+    ${invoice.total.toFixed(2)}
+  </p>
+
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      deleteInvoice(invoice.id);
+    }}
+    className="rounded bg-red-600 px-3 py-2 text-sm font-semibold hover:bg-red-700"
+  >
+    Delete
+  </button>
+</div>
                   </div>
                 ))}
               </div>
