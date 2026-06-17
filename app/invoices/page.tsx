@@ -139,7 +139,12 @@ function deleteInvoice(id: number) {
                 placeholder="Customer name"
                 className="mt-6 w-full rounded-lg bg-slate-800 p-3 outline-none focus:ring-2 focus:ring-blue-500"
               />
-
+<div className="mb-2 grid grid-cols-12 gap-3 px-1 text-sm font-semibold text-slate-400">
+  <div className="col-span-6">Description</div>
+  <div className="col-span-2 text-center">Qty</div>
+  <div className="col-span-2 text-center">Unit Price</div>
+  <div className="col-span-2"></div>
+</div>
               <div className="mt-6 space-y-4">
                 {items.map((item, index) => (
                   <div key={index} className="grid grid-cols-12 gap-3">
@@ -161,14 +166,21 @@ function deleteInvoice(id: number) {
                       className="col-span-2 rounded-lg bg-slate-800 p-3 outline-none focus:ring-2 focus:ring-blue-500"
                     />
 
-                    <input
-                      type="number"
-                      value={item.price}
-                      onChange={(e) =>
-                        updateItem(index, "price", Number(e.target.value))
-                      }
-                      className="col-span-2 rounded-lg bg-slate-800 p-3 outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                   <div className="relative col-span-2">
+  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+    $
+  </span>
+
+ <input
+  type="text"
+  inputMode="decimal"
+  value={item.price === 0 ? "" : item.price}
+  onChange={(e) =>
+    updateItem(index, "price", parseFloat(e.target.value) || 0)
+  }
+  className="w-full rounded-lg bg-slate-800 p-3 pl-7 outline-none focus:ring-2 focus:ring-blue-500"
+/>
+</div>
 
                     <button
                       onClick={() => removeItem(index)}
