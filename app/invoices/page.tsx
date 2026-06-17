@@ -9,10 +9,23 @@ type InvoiceItem = {
   price: number;
 };
 
+type SavedInvoice = {
+  id: number;
+  invoiceNumber: number;
+  customer: string;
+  items: InvoiceItem[];
+  subtotal: number;
+  tax: number;
+  total: number;
+  createdAt: string;
+};
+
 export default function InvoicesPage() {
+  const [customerName, setCustomerName] = useState("");
   const [items, setItems] = useState<InvoiceItem[]>([
     { description: "", quantity: 1, price: 0 },
   ]);
+  const [invoices, setInvoices] = useState<SavedInvoice[]>([]);
 
   const subtotal = items.reduce(
     (sum, item) => sum + item.quantity * item.price,
@@ -21,6 +34,7 @@ export default function InvoicesPage() {
 
   const tax = subtotal * 0.086;
   const total = subtotal + tax;
+  const nextInvoiceNumber = 1001 + invoices.length;
 
   function addItem() {
     setItems([...items, { description: "", quantity: 1, price: 0 }]);
@@ -36,14 +50,31 @@ export default function InvoicesPage() {
     field: keyof InvoiceItem,
     value: string | number
   ) {
-    const updated = [...items];
+    const updatedItems = [...items];
 
-    updated[index] = {
-      ...updated[index],
+    updatedItems[index] = {
+      ...updatedItems[index],
       [field]: value,
     };
 
-    setItems(updated);
+    setItems(updatedItems);
+  }
+
+  function saveInvoice() {
+    const newInvoice: SavedInvoice = {
+      id: Date.now(),
+      invoiceNumber: nextInvoiceNumber,
+      customer: customerName || "Unnamed Customer",
+      items,
+      subtotal,
+      tax,
+      total,
+      createdAt: new Date().toLocaleDateString(),
+    };
+
+    setInvoices([newInvoice, ...invoices]);
+    setCustomerName("");
+    setItems([{ description: "", quantity: 1, price: 0 }]);
   }
 
   return (
@@ -62,6 +93,8 @@ export default function InvoicesPage() {
               <h3 className="text-2xl font-bold">Invoice Details</h3>
 
               <input
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
                 placeholder="Customer name"
                 className="mt-6 w-full rounded-lg bg-slate-800 p-3 outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -114,7 +147,10 @@ export default function InvoicesPage() {
                   + Add Item
                 </button>
 
-                <button className="rounded-lg bg-blue-600 px-6 py-3 font-semibold hover:bg-blue-500">
+                <button
+                  onClick={saveInvoice}
+                  className="rounded-lg bg-blue-600 px-6 py-3 font-semibold hover:bg-blue-500"
+                >
                   Save Invoice
                 </button>
               </div>
@@ -125,7 +161,7 @@ export default function InvoicesPage() {
 
               <div className="mt-6 border-t border-slate-300 pt-6">
                 <p className="font-semibold">InvoiceAI</p>
-                <p className="text-slate-500">Invoice #1001</p>
+                <p className="text-slate-500">Invoice #{nextInvoiceNumber}</p>
               </div>
 
               <div className="mt-8">
@@ -156,6 +192,34 @@ export default function InvoicesPage() {
                 </div>
               </div>
             </div>
+          </div>
+
+          <div className="mt-8 rounded-xl bg-slate-900 p-6">
+            <h3 className="text-2xl font-bold">Invoice History</h3>
+
+            {invoices.length === 0 ? (
+              <p className="mt-4 text-slate-400">No invoices saved yet.</p>
+            ) : (
+              <div className="mt-4 space-y-3">
+                {invoices.map((invoice) => (
+                  <div
+                    key={invoice.id}
+                    className="flex items-center justify-between rounded-lg bg-slate-800 p-4"
+                  >
+                    <div>
+                      <p className="font-semibold">{invoice.customer}</p>
+                      <p className="text-sm text-slate-400">
+                        Invoice #{invoice.invoiceNumber} • {invoice.createdAt}
+                      </p>
+                    </div>
+
+                    <p className="text-xl font-bold">
+                      ${invoice.total.toFixed(2)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       </div>
