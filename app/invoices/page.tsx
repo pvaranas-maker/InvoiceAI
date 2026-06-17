@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "../../components/Sidebar";
 
 type InvoiceItem = {
@@ -26,7 +26,16 @@ export default function InvoicesPage() {
     { description: "", quantity: 1, price: 0 },
   ]);
   const [invoices, setInvoices] = useState<SavedInvoice[]>([]);
+  useEffect(() => {
+    const savedInvoices = localStorage.getItem("invoices");
 
+    if (savedInvoices) {
+        setInvoices(JSON.parse(savedInvoices));
+    }
+}, []); 
+useEffect(() => {
+    localStorage.setItem("invoices", JSON.stringify(invoices));
+}, [invoices]);
   const subtotal = items.reduce(
     (sum, item) => sum + item.quantity * item.price,
     0
