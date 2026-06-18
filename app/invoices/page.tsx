@@ -30,12 +30,25 @@ export default function InvoicesPage() {
     ]);
     const [invoices, setInvoices] = useState<SavedInvoice[]>([]);
     const [selectedInvoice, setSelectedInvoice] = useState<SavedInvoice | null>(null);
-
+    const [companySettings, setCompanySettings] = useState({
+        companyName: "InvoiceAI",
+        address: "",
+        phone: "",
+        email: "",
+        website: "",
+        taxRate: 8.6,
+    });
     useEffect(() => {
         const savedInvoices = localStorage.getItem("invoices");
 
         if (savedInvoices) {
             setInvoices(JSON.parse(savedInvoices));
+        }
+
+        const savedSettings = localStorage.getItem("companySettings");
+
+        if (savedSettings) {
+            setCompanySettings(JSON.parse(savedSettings));
         }
     }, []);
     useEffect(() => {
@@ -46,7 +59,8 @@ export default function InvoicesPage() {
         0
     );
 
-    const tax = subtotal * 0.086;
+    const tax = subtotal * (companySettings.taxRate / 100);
+
     const total = subtotal + tax;
     const nextInvoiceNumber = 1001 + invoices.length;
 
@@ -122,16 +136,28 @@ export default function InvoicesPage() {
     }
     const downloadPDF = () => {
         const doc = new jsPDF();
+        doc.setFontSize(20);
+        doc.text(companySettings.companyName, 14, 18);
 
+        doc.setFontSize(10);
+        doc.text(companySettings.address, 14, 25);
+        doc.text(companySettings.phone, 14, 31);
+        doc.text(companySettings.email, 14, 37);
+        doc.text(companySettings.website, 14, 43);
         doc.setFontSize(22);
-        doc.text("Invoice", 14, 20);
+        doc.text("INVOICE", 150, 20);
 
         doc.setFontSize(12);
-        doc.text(`Customer: ${customerName}`, 14, 35);
-        doc.text(`Invoice #: ${nextInvoiceNumber}`, 14, 43);
+        doc.text(`Customer: ${customerName}`, 14, 56);
+        doc.text(`Invoice #: INV-${nextInvoiceNumber}`, 14, 64);
 
+        doc.text(
+            `Date: ${new Date().toLocaleDateString()}`,
+            14,
+            72
+        );
         autoTable(doc, {
-            startY: 55,
+            startY: 84,
             head: [["Description", "Qty", "Unit Price", "Total"]],
             body: items.map((item) => [
                 item.description,
@@ -250,110 +276,112 @@ export default function InvoicesPage() {
                             </div>
 
                             <div className="rounded-xl bg-white p-8 text-slate-950">
-                <h3 className="text-3xl font-bold">Invoice Preview</h3>
+                                <h3 className="text-3xl font-bold">Invoice Preview</h3>
 
-                <div className="mt-6 border-t border-slate-300 pt-6">
-                    <p className="font-semibold">InvoiceAI</p>
-                    <p className="text-slate-500">Invoice #{nextInvoiceNumber}</p>
-                </div>
+                                <div className="mt-6 border-t border-slate-300 pt-6">
+                                    <p className="font-semibold">
+                                        {companySettings.companyName}
+                                    </p>
+                                    <p className="text-slate-500">Invoice #{nextInvoiceNumber}</p>
+                                </div>
 
-                <div className="mt-8">
-                    <p className="font-semibold">Line Items</p>
+                                <div className="mt-8">
+                                    <p className="font-semibold">Line Items</p>
 
-                    <div className="mt-4">
-                        <div className="grid grid-cols-12 border-b border-slate-300 pb-2 text-sm font-semibold text-slate-500">
-                            <div className="col-span-6">Description</div>
-                            <div className="col-span-2 text-center">Qty</div>
-                            <div className="col-span-2 text-right">Unit</div>
-                            <div className="col-span-2 text-right">Total</div>
+                                    <div className="mt-4">
+                                        <div className="grid grid-cols-12 border-b border-slate-300 pb-2 text-sm font-semibold text-slate-500">
+                                            <div className="col-span-6">Description</div>
+                                            <div className="col-span-2 text-center">Qty</div>
+                                            <div className="col-span-2 text-right">Unit</div>
+                                            <div className="col-span-2 text-right">Total</div>
+                                        </div>
+
+                                        {items.map((item, index) => (
+                                            <div
+                                                key={index}
+                                                className="grid grid-cols-12 py-3 border-b border-slate-200"
+                                            >
+                                                <div className="col-span-6">
+                                                    {item.description || "No description yet"}
+                                                </div>
+
+                                                <div className="col-span-2 text-center">
+                                                    {item.quantity}
+                                                </div>
+
+                                                <div className="col-span-2 text-right">
+                                                    ${item.price.toFixed(2)}
+                                                </div>
+
+                                                <div className="col-span-2 text-right font-medium">
+                                                    ${(item.quantity * item.price).toFixed(2)}
+                                                </div>
+                                            </div>
+                                        ))}
+
+                                        <div className="mt-8 space-y-2">
+                                            <div className="flex justify-between">
+                                                <span>Subtotal</span>
+                                                <span>${subtotal.toFixed(2)}</span>
+                                            </div>
+
+                                            <div className="flex justify-between">
+                                                <span>Tax</span>
+                                                <span>${tax.toFixed(2)}</span>
+                                            </div>
+
+                                            <div className="flex justify-between border-t border-slate-300 pt-4 text-xl font-bold">
+                                                <span>Total</span>
+                                                <span>${total.toFixed(2)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        {items.map((item, index) => (
-                            <div
-                                key={index}
-                                className="grid grid-cols-12 py-3 border-b border-slate-200"
-                            >
-                                <div className="col-span-6">
-                                    {item.description || "No description yet"}
-                                </div>
-
-                                <div className="col-span-2 text-center">
-                                    {item.quantity}
-                                </div>
-
-                                <div className="col-span-2 text-right">
-                                    ${item.price.toFixed(2)}
-                                </div>
-
-                                <div className="col-span-2 text-right font-medium">
-                                    ${(item.quantity * item.price).toFixed(2)}
-                                </div>
-                            </div>
-                        ))}
-
-                        <div className="mt-8 space-y-2">
-                            <div className="flex justify-between">
-                                <span>Subtotal</span>
-                                <span>${subtotal.toFixed(2)}</span>
-                            </div>
-
-                            <div className="flex justify-between">
-                                <span>Tax</span>
-                                <span>${tax.toFixed(2)}</span>
-                            </div>
-
-                            <div className="flex justify-between border-t border-slate-300 pt-4 text-xl font-bold">
-                                <span>Total</span>
-                                <span>${total.toFixed(2)}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            </div>
-
-                {invoices.length === 0 ? (
-                    <p className="mt-4 text-slate-400">No invoices saved yet.</p>
-                ) : (
-                    <div className="mt-4 space-y-3">
-                        {invoices.map((invoice) => (
-                            <div
-                                key={invoice.id}
-                                onClick={() => {
-                                    setSelectedInvoice(invoice);
-                                    setCustomerName(invoice.customer);
-                                    setItems(invoice.items);
-                                }}
-                                className="flex cursor-pointer items-center justify-between rounded-lg bg-slate-800 p-4 hover:bg-slate-700"
-                            >
-                                <div>
-                                    <p className="font-semibold">{invoice.customer}</p>
-                                    <p className="text-sm text-slate-400">
-                                        Invoice #{invoice.invoiceNumber} • {invoice.createdAt}
-                                    </p>
-                                </div>
-
-                                <div className="flex items-center gap-4">
-                                    <p className="text-xl font-bold">
-                                        ${invoice.total.toFixed(2)}
-                                    </p>
-
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            deleteInvoice(invoice.id);
+                        {invoices.length === 0 ? (
+                            <p className="mt-4 text-slate-400">No invoices saved yet.</p>
+                        ) : (
+                            <div className="mt-4 space-y-3">
+                                {invoices.map((invoice) => (
+                                    <div
+                                        key={invoice.id}
+                                        onClick={() => {
+                                            setSelectedInvoice(invoice);
+                                            setCustomerName(invoice.customer);
+                                            setItems(invoice.items);
                                         }}
-                                        className="rounded bg-red-600 px-3 py-2 text-sm font-semibold hover:bg-red-700"
+                                        className="flex cursor-pointer items-center justify-between rounded-lg bg-slate-800 p-4 hover:bg-slate-700"
                                     >
-                                        Delete
-                                    </button>
-                                </div>
+                                        <div>
+                                            <p className="font-semibold">{invoice.customer}</p>
+                                            <p className="text-sm text-slate-400">
+                                                Invoice #{invoice.invoiceNumber} • {invoice.createdAt}
+                                            </p>
+                                        </div>
+
+                                        <div className="flex items-center gap-4">
+                                            <p className="text-xl font-bold">
+                                                ${invoice.total.toFixed(2)}
+                                            </p>
+
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    deleteInvoice(invoice.id);
+                                                }}
+                                                className="rounded bg-red-600 px-3 py-2 text-sm font-semibold hover:bg-red-700"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                        ))}
+                        )}
                     </div>
-                )}
-                </div>
-            </section>
+                </section>
             </div>
         </main>
     );
