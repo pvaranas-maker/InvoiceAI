@@ -1,5 +1,8 @@
 "use client";
 
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
 import { useEffect, useState } from "react";
 import Sidebar from "../../components/Sidebar";
 
@@ -117,7 +120,38 @@ export default function InvoicesPage() {
         setCustomerName("");
         setItems([{ description: "", quantity: 1, price: 0 }]);
     }
+    const downloadPDF = () => {
+        const doc = new jsPDF();
 
+        doc.setFontSize(22);
+        doc.text("Invoice", 14, 20);
+
+        doc.setFontSize(12);
+        doc.text(`Customer: ${customerName}`, 14, 35);
+        doc.text(`Invoice #: ${nextInvoiceNumber}`, 14, 43);
+
+        autoTable(doc, {
+            startY: 55,
+            head: [["Description", "Qty", "Unit Price", "Total"]],
+            body: items.map((item) => [
+                item.description,
+                item.quantity.toString(),
+                `$${item.price.toFixed(2)}`,
+                `$${(item.quantity * item.price).toFixed(2)}`
+            ]),
+        });
+
+        const finalY =
+            (doc as any).lastAutoTable?.finalY || 100;
+
+        doc.text(`Subtotal: $${subtotal.toFixed(2)}`, 140, finalY + 10);
+        doc.text(`Tax: $${tax.toFixed(2)}`, 140, finalY + 18);
+
+        doc.setFontSize(16);
+        doc.text(`Total: $${total.toFixed(2)}`, 140, finalY + 32);
+
+        doc.save(`Invoice-${nextInvoiceNumber}.pdf`);
+    };
     return (
         <main className="min-h-screen bg-slate-950 text-white">
             <div className="flex">
@@ -195,7 +229,7 @@ export default function InvoicesPage() {
                             <div className="mt-6 flex gap-4">
                                 <button
                                     onClick={addItem}
-                                    className="rounded-lg bg-green-600 px-6 py-3 font-semibold hover:bg-green-500"
+                                    className="rounded-lg bg-green-600 px-4 py-2 font-semibold hover:bg-green-500"
                                 >
                                     + Add Item
                                 </button>
@@ -206,117 +240,120 @@ export default function InvoicesPage() {
                                 >
                                     {selectedInvoice ? "Update Invoice" : "Save Invoice"}
                                 </button>
+
+                                <button
+                                    onClick={downloadPDF}
+                                    className="rounded-lg bg-purple-600 px-6 py-3 font-semibold hover:bg-purple-500"
+                                >
+                                    Download PDF
+                                </button>
                             </div>
+
+                            <div className="rounded-xl bg-white p-8 text-slate-950">
+                <h3 className="text-3xl font-bold">Invoice Preview</h3>
+
+                <div className="mt-6 border-t border-slate-300 pt-6">
+                    <p className="font-semibold">InvoiceAI</p>
+                    <p className="text-slate-500">Invoice #{nextInvoiceNumber}</p>
+                </div>
+
+                <div className="mt-8">
+                    <p className="font-semibold">Line Items</p>
+
+                    <div className="mt-4">
+                        <div className="grid grid-cols-12 border-b border-slate-300 pb-2 text-sm font-semibold text-slate-500">
+                            <div className="col-span-6">Description</div>
+                            <div className="col-span-2 text-center">Qty</div>
+                            <div className="col-span-2 text-right">Unit</div>
+                            <div className="col-span-2 text-right">Total</div>
                         </div>
 
-                        <div className="rounded-xl bg-white p-8 text-slate-950">
-                            <h3 className="text-3xl font-bold">Invoice Preview</h3>
+                        {items.map((item, index) => (
+                            <div
+                                key={index}
+                                className="grid grid-cols-12 py-3 border-b border-slate-200"
+                            >
+                                <div className="col-span-6">
+                                    {item.description || "No description yet"}
+                                </div>
 
-                            <div className="mt-6 border-t border-slate-300 pt-6">
-                                <p className="font-semibold">InvoiceAI</p>
-                                <p className="text-slate-500">Invoice #{nextInvoiceNumber}</p>
-                            </div>
+                                <div className="col-span-2 text-center">
+                                    {item.quantity}
+                                </div>
 
-                            <div className="mt-8">
-                                <p className="font-semibold">Line Items</p>
+                                <div className="col-span-2 text-right">
+                                    ${item.price.toFixed(2)}
+                                </div>
 
-                                <div className="mt-4">
-                                    <div className="grid grid-cols-12 border-b border-slate-300 pb-2 text-sm font-semibold text-slate-500">
-                                        <div className="col-span-6">Description</div>
-                                        <div className="col-span-2 text-center">Qty</div>
-                                        <div className="col-span-2 text-right">Unit</div>
-                                        <div className="col-span-2 text-right">Total</div>
-                                    </div>
-
-                                    {items.map((item, index) => (
-                                        <div
-                                            key={index}
-                                            className="grid grid-cols-12 py-3 border-b border-slate-200"
-                                        >
-                                            <div className="col-span-6">
-                                                {item.description || "No description yet"}
-                                            </div>
-
-                                            <div className="col-span-2 text-center">
-                                                {item.quantity}
-                                            </div>
-
-                                            <div className="col-span-2 text-right">
-                                                ${item.price.toFixed(2)}
-                                            </div>
-
-                                            <div className="col-span-2 text-right font-medium">
-                                                ${(item.quantity * item.price).toFixed(2)}
-                                            </div>
-                                        </div>
-                                    ))}
-
-                                    <div className="mt-8 space-y-2">
-                                        <div className="flex justify-between">
-                                            <span>Subtotal</span>
-                                            <span>${subtotal.toFixed(2)}</span>
-                                        </div>
-
-                                        <div className="flex justify-between">
-                                            <span>Tax</span>
-                                            <span>${tax.toFixed(2)}</span>
-                                        </div>
-
-                                        <div className="flex justify-between border-t border-slate-300 pt-4 text-xl font-bold">
-                                            <span>Total</span>
-                                            <span>${total.toFixed(2)}</span>
-                                        </div>
-                                    </div>
+                                <div className="col-span-2 text-right font-medium">
+                                    ${(item.quantity * item.price).toFixed(2)}
                                 </div>
                             </div>
-                        </div>
+                        ))}
 
-                        <div className="mt-8 rounded-xl bg-slate-900 p-6">
-                            <h3 className="text-2xl font-bold">Invoice History</h3>
+                        <div className="mt-8 space-y-2">
+                            <div className="flex justify-between">
+                                <span>Subtotal</span>
+                                <span>${subtotal.toFixed(2)}</span>
+                            </div>
 
-                            {invoices.length === 0 ? (
-                                <p className="mt-4 text-slate-400">No invoices saved yet.</p>
-                            ) : (
-                                <div className="mt-4 space-y-3">
-                                    {invoices.map((invoice) => (
-                                        <div
-                                            key={invoice.id}
-                                            onClick={() => {
-                                                setSelectedInvoice(invoice);
-                                                setCustomerName(invoice.customer);
-                                                setItems(invoice.items);
-                                            }}
-                                            className="flex cursor-pointer items-center justify-between rounded-lg bg-slate-800 p-4 hover:bg-slate-700"
-                                        >
-                                            <div>
-                                                <p className="font-semibold">{invoice.customer}</p>
-                                                <p className="text-sm text-slate-400">
-                                                    Invoice #{invoice.invoiceNumber} • {invoice.createdAt}
-                                                </p>
-                                            </div>
+                            <div className="flex justify-between">
+                                <span>Tax</span>
+                                <span>${tax.toFixed(2)}</span>
+                            </div>
 
-                                            <div className="flex items-center gap-4">
-                                                <p className="text-xl font-bold">
-                                                    ${invoice.total.toFixed(2)}
-                                                </p>
-
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        deleteInvoice(invoice.id);
-                                                    }}
-                                                    className="rounded bg-red-600 px-3 py-2 text-sm font-semibold hover:bg-red-700"
-                                                >
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                            <div className="flex justify-between border-t border-slate-300 pt-4 text-xl font-bold">
+                                <span>Total</span>
+                                <span>${total.toFixed(2)}</span>
+                            </div>
                         </div>
                     </div>
-                </section>
+                </div>
+            </div>
+            </div>
+
+                {invoices.length === 0 ? (
+                    <p className="mt-4 text-slate-400">No invoices saved yet.</p>
+                ) : (
+                    <div className="mt-4 space-y-3">
+                        {invoices.map((invoice) => (
+                            <div
+                                key={invoice.id}
+                                onClick={() => {
+                                    setSelectedInvoice(invoice);
+                                    setCustomerName(invoice.customer);
+                                    setItems(invoice.items);
+                                }}
+                                className="flex cursor-pointer items-center justify-between rounded-lg bg-slate-800 p-4 hover:bg-slate-700"
+                            >
+                                <div>
+                                    <p className="font-semibold">{invoice.customer}</p>
+                                    <p className="text-sm text-slate-400">
+                                        Invoice #{invoice.invoiceNumber} • {invoice.createdAt}
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center gap-4">
+                                    <p className="text-xl font-bold">
+                                        ${invoice.total.toFixed(2)}
+                                    </p>
+
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            deleteInvoice(invoice.id);
+                                        }}
+                                        className="rounded bg-red-600 px-3 py-2 text-sm font-semibold hover:bg-red-700"
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+                </div>
+            </section>
             </div>
         </main>
     );
