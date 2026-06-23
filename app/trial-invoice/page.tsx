@@ -713,14 +713,14 @@ export default function InvoicesPage() {
                                     </div>
                                 </div>
 
-                                {/* Saved Invoices List — restyled to match the dark card system, sits below the form on this side */}
-                                <div className="bg-[#12151f] border border-gray-800/80 rounded-2xl p-6 md:p-8 shadow-xl">
-                                    <h2 className="text-xl font-semibold mb-6 text-gray-200">Saved Invoices</h2>
+                                {/* Saved Invoices List — Independent Scroll */}
+                                <div className="bg-[#12151f] border border-gray-800/80 rounded-2xl p-6 md:p-8 shadow-xl flex flex-col">
+                                    <h2 className="text-xl font-semibold mb-6 text-gray-200 flex-shrink-0">Saved Invoices</h2>
 
                                     {invoices.length === 0 ? (
-                                        <p className="text-gray-500 text-sm">No invoices saved yet.</p>
+                                        <p className="text-gray-500 text-sm py-8 text-center">No invoices saved yet.</p>
                                     ) : (
-                                        <div className="space-y-3">
+                                        <div className="flex-1 overflow-y-auto pr-2 max-h-[520px] space-y-3 custom-scroll">
                                             {invoices.map((invoice) => (
                                                 <div
                                                     key={invoice.id}
@@ -737,7 +737,6 @@ export default function InvoicesPage() {
                                                         );
 
                                                         setCustomerName(fullInvoice.customerName || "");
-
 
                                                         const customer = customers.find(
                                                             (c) => c.id === fullInvoice.customerId
