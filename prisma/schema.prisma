@@ -35,7 +35,13 @@ model Invoice {
   customerId    Int?
   customer      Customer?     @relation(fields: [customerId], references: [id])
   items         InvoiceItem[]
+
+  lastReminderSent DateTime?
+reminderCount    Int @default(0)
+
 }
+
+
 
 model InvoiceItem {
   id          Int      @id @default(autoincrement())

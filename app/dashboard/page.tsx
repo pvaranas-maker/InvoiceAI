@@ -297,6 +297,49 @@ export default function Dashboard() {
       .slice(0, 8);
   }, [invoices, estimates]);
 
+  async function sendReminder(invoice: Invoice) {
+    try {
+      const response = await fetch("/api/email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          to: "pvaranas@gmail.com",
+          subject: `Payment Reminder - Invoice #${invoice.invoiceNumber}`,
+          filename: `Invoice-${invoice.invoiceNumber}.pdf`,
+          pdfBase64: "",
+          html: `
+          <h2>Payment Reminder</h2>
+
+          <p>Hello ${invoice.customer?.name || invoice.customerName},</p>
+
+          <p>This is a friendly reminder that the following invoice is overdue.</p>
+
+          <ul>
+            <li><strong>Invoice:</strong> #${invoice.invoiceNumber}</li>
+            <li><strong>Amount Due:</strong> ${formatCurrency(invoice.total)}</li>
+            <li><strong>Due Date:</strong> ${invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : "N/A"}</li>
+          </ul>
+
+          <p>Please submit payment at your earliest convenience.</p>
+
+          <p>Thank you,<br/>InvoiceAI</p>
+        `,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Unable to send reminder.");
+      }
+
+      alert("Reminder sent successfully!");
+    } catch (error) {
+      console.error(error);
+      alert("Failed to send reminder.");
+    }
+  }
+
 
 
   return (
@@ -552,9 +595,20 @@ export default function Dashboard() {
                     </div>
 
                     <div className="flex gap-3 mt-4">
-                      <button className="flex-1 rounded-lg bg-red-600 hover:bg-red-700 transition py-2 text-sm font-semibold">Send Reminder</button>
+                      <button
+                        onClick={() => sendReminder(invoice)}
+                        className="flex-1 rounded-lg bg-red-600 hover:bg-red-700 transition py-2 text-sm font-semibold">
 
-                      <button className="flex-1 rounded-lg bg-[#252b3c] hover:bg-[#31384c] transition py-2 text-sm font-semibold">View Invoice</button>
+                        Send Reminder
+
+                      </button>
+
+                      <button
+                        className="flex-1 rounded-lg bg-[#252b3c] hover:bg-[#31384c] transition py-2 text-sm font-semibold">
+
+                        View Invoice
+
+                      </button>
                     </div>
                   </div>
                 ))

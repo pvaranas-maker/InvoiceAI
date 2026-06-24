@@ -720,7 +720,10 @@ export default function InvoicesPage() {
                                     {invoices.length === 0 ? (
                                         <p className="text-gray-500 text-sm">No invoices saved yet.</p>
                                     ) : (
-                                        <div className="space-y-3">
+                                        <div
+                                            className="max-h-[65vh] overflow-y-auto pr-2 space-y-3"
+                                            style={{ scrollbarColor: "#3d4250 #12151f", scrollbarWidth: "thin" }}
+                                        >
                                             {invoices.map((invoice) => (
                                                 <div
                                                     key={invoice.id}

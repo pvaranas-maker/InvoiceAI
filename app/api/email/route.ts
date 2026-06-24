@@ -12,12 +12,14 @@ export async function POST(request: Request) {
             to: body.to,
             subject: body.subject,
             html: body.html,
-            attachments: [
-                {
-                    filename: body.filename,
-                    content: body.pdfBase64,
-                },
-            ],
+            attachments: body.pdfBase64
+                ? [
+                    {
+                        filename: body.filename || "invoice.pdf",
+                        content: body.pdfBase64,
+                    },
+                ]
+                : undefined,
         });
 
         console.log("Resend result:", result);
